@@ -1,134 +1,123 @@
-// In Practice, You should use the statndard input/output
-// in order to receive a score properly.
-// Do not use file input and output. Please be very careful. 
-
 #include<iostream>
 
 using namespace std;
-int Answer, N, d;
-int Gate[2][4];
-int Visit[100];
-int Select[2][4];
-int V[4];
 
+int visit[61], visit_cong[3], n, vitri_cong[3], sl_nguoi[3], kq;
 
-void Nhet(int x, int y)
-{
-	int k=0;
-	int u =Gate[0][x], v;
-	if ( Visit[u] == 0)
-		{
-			Visit[u] =1;
-			k++;
-			d++;
-		}
-	while (k < Gate[1][x] && y == 1)
+int tinh(int vt_cong, int sl, int uu_tien){
+
+	int kc = 0;
+	if (visit[vt_cong] == 0)
 	{
-		u--;
-		if (u >=1 && k < Gate[1][x] && Visit[u] == 0)
-		{
-			Visit[u] =1;
-			k++;
-			d = d+ Gate[0][x] -u +1;
-		}
-		
-		v = 2*Gate[0][x] - u;
-
-		if (v <= N && k < Gate[1][x] && Visit[v] == 0)
-		{
-			Visit[v] =1;
-			k++;
-			d = d+ v - Gate[0][x] +1;
-		}
+		sl--;
+		visit[vt_cong] = 1;
+		kc++;
 	}
-
-	while (k < Gate[1][x] && y == 2)
+	int left = vt_cong - 1;
+	int right = vt_cong + 1;
+	if (uu_tien == 0)
 	{
-		u++;
-		if (u <= N && k < Gate[1][x] && Visit[u] == 0)
+		while (sl > 0)
 		{
-			Visit[u] =1;
-			k++;
-			d = d+ u - Gate[0][x] +1;
-		}
-		
-		v = 2*Gate[0][x] - u;
-
-		if (v >= 1 && k < Gate[1][x] && Visit[v] == 0)
-		{
-			Visit[v] =1;
-			k++;
-			d = d+ Gate[0][x] -v +1;
-		}
-	}
-}
-
-void loop(int x)
-{
-	if (x > 3)
-	{
-		d =0;
-		for(int i =1; i<=N; i++) Visit[i] =0;
-		for(int i =1; i<=3; i++)
-		{
-			Nhet(Select[0][i], Select[1][i]);
-		}
-		if (d < Answer) Answer=d;
-	}
-	else
-	{
-		for (int i = 1; i<=3; i++)
-			if (V[i] ==0)
+			// Xet trai
+			if (left > 0 && visit[left] == 0)
 			{
-				V[i] =1;
-				Select[0][x] =i;
-				Select[1][x] = 1;
-				loop(x+1);
-				Select[1][x] = 2;
-				loop(x+1);
-				V[i] =0;
+				sl--;
+				visit[left] = 1;
+				kc+= vt_cong - left + 1;
+				if (sl == 0) break;
 			}
+			// xet phai
+			if (visit[right] == 0 && right <= n)
+			{
+				sl--;
+				visit[right] = 1;
+				kc+= right - vt_cong + 1;
+				if (sl == 0) break;
+			}
+			left--;
+			right++;
+		}
+	}else
+	{
+		while (sl > 0)
+		{
+			// xet phai
+			if (visit[right] == 0 && right <= n)
+			{
+				sl--;
+				visit[right] = 1;
+				kc+= right - vt_cong + 1;
+				if (sl == 0) break;
+			}
+			// Xet trai
+			if (left > 0 && visit[left] == 0)
+			{
+				sl--;
+				visit[left] = 1;
+				kc+= vt_cong - left + 1;
+				if (sl == 0) break;
+			}
+			left--;
+			right++;
+		}
+	}
+	
+	return kc;
+}
+
+void back_track(int dem, int kc, int uu_tien){
+	if (dem == 3)
+	{
+		if (kc < kq)
+		{
+			kq = kc;
+		}
+		return;
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		if (visit_cong[i] == 0)
+		{
+			visit_cong[i] = 1;
+			int back_up[61];
+			for (int j = 1; j <= n; j++)
+			{
+				back_up[j] = visit[j];
+			}
+			back_track(dem+1, kc + tinh(vitri_cong[i], sl_nguoi[i], uu_tien), uu_tien);
+			visit_cong[i] = 0;
+			for (int j = 1; j <= n; j++)
+			{
+				visit[j] = back_up[j];
+			}
+		}
 	}
 }
 
-int main(int argc, char** argv)
-{
-	int test_case;
+int main(){
+	freopen("input.txt","r",stdin);
 	int T;
-	
-	
-	ios::sync_with_stdio(false);
-	
-	/* 
-	The freopen function below opens input.txt in read only mode and 
-	sets your standard input to work with the opened file. 
-	When you test your code with the sample data, you can use the function
-	below to read in from the sample data file instead of the standard input.
-	So. you can uncomment the following line for your local test. But you
-	have to comment the following line when you submit for your scores.
-	*/
-
-	freopen("input.txt", "r", stdin);
 	cin >> T;
-
-	/*
-	   Read each test case from standard input.
-	*/
-	for(test_case = 1; test_case <= T; ++test_case)
+	for (int t = 1; t <= T; t++)
 	{
-		Answer = 9999;
-		d =0;
-		cin >> N;
-		for (int i=1; i<=3; i++)
+		cin >> n;
+		for (int i = 1; i <= n; i++)
 		{
-			cin >> Gate[0][i];
-			cin >> Gate[1][i];
+			visit[i] = 0;
 		}
+		for (int i = 0; i < 3; i++)
+		{
+			cin >> vitri_cong[i] >> sl_nguoi[i];
+			visit_cong[i] = 0;
+		}
+		kq = 9999;
+		back_track(0, 0, 0);
+		back_track(0, 0, 1);
+		cout << "Case #" << t << "\n";
+		cout << kq << "\n";
 
-		loop(1);
-
-		// Print the answer to standard output(screen).
-		cout << "Case #" << test_case << endl << Answer << endl;
 	}
-	return 0;//Your program should return 0 on normal termination.
+	return 0;
 }
