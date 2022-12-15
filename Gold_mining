@@ -158,7 +158,7 @@ int main()
 		{
 			for(int j=0;j<N;j++)
 			{
-				if(map_BFS[i][j][G] < result && map_BFS[i][j][G]>0)
+				if(map_BFS[i][j][G] < result && map_BFS[i][j][G]>0 && map[i][j] !=2)
 				{
 					result=map_BFS[i][j][G];
 				}
