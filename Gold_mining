@@ -1,0 +1,171 @@
+#include <iostream>
+using namespace std;
+int N,G,map[21][21],map_BFS[21][21][5];
+#define INT_MAXX -1
+int Qx[100000],Qy[100000],Qd[100000];
+int f=-1,r=-1;
+int dx[4]={-1,0,1,0};
+int dy[4]={0,1,0,-1};
+bool visited[21][21];
+int arr_gold_x[4],arr_gold_y[4];
+int max_cost_in_cell[5];
+void resetmap()
+{
+	for(int i=0;i<N;i++)
+	{
+		for(int j=0;j<N;j++)
+		{
+			map[i][j]=0;
+		}
+	}
+}
+void resetmap_BFS()
+{
+	for(int i=0;i<=G;i++)
+	{
+		for(int x=0;x<N;x++)
+		{
+			for(int y=0;y<N;y++)
+			{
+				map_BFS[x][y][i]= INT_MAXX;
+			}
+		}
+	}
+}
+void resetmap_visited()
+{
+	for(int i=0;i<N;i++)
+	{
+		for(int j=0;j<N;j++)
+		{
+			visited[i][j]=false;
+		}
+	}
+}
+bool isSafe(int x, int y)
+{
+	if(x>=0 && x<N && y>=0 && y<N)
+	{
+		return true;
+	}
+	return false;
+}
+void Push(int x, int y, int d)
+{
+	f++;
+	Qx[f]=x;
+	Qy[f]=y;
+	Qd[f]=d;
+}
+void Pop(int &x, int &y, int &d)
+{
+	r++;
+	x=Qx[r];
+	y=Qy[r];
+	d=Qd[r];
+}
+void BFS(int x, int y, int index)
+{
+	f=-1,r=-1;
+	Push(x,y,0);
+	visited[x][y]=true;
+	while(f!=r)
+	{
+		int a,b,d;
+		Pop(a,b,d);
+		d++;
+		for(int i=0;i<4;i++)
+		{
+			int aa=a+dx[i];
+			int bb=b+dy[i];
+			if(isSafe(aa,bb) && map[aa][bb] != 0 && !visited[aa][bb])
+			{
+				visited[aa][bb] =true;
+				Push(aa,bb,d);
+				map_BFS[aa][bb][index]=d;
+			}
+		}
+	}
+}
+int find_max_cost(int x, int y)
+{
+	int index=0;
+	for(int i=0;i<G;i++)
+	{
+		max_cost_in_cell[index]=  map_BFS[x][y][i] ;
+		index++;
+	}
+	int max_cost = max_cost_in_cell[0];
+	for(int i=0;i<G;i++)
+	{
+		if(max_cost_in_cell[i] > max_cost)
+		{
+			max_cost=max_cost_in_cell[i];
+		}
+	}
+	return max_cost;
+}
+int main()
+{
+	freopen("input.txt","r",stdin);
+	int T;
+	cin>>T;
+	for(int tc=1;tc<=T;tc++)
+	{
+		cin>>N>>G;
+		resetmap();
+		resetmap_BFS();
+		resetmap_visited();
+		int x,y;
+		for(int i=0;i<G;i++)
+		{
+			cin>>x>>y;
+			map[x-1][y-1]=2;
+			arr_gold_x[i]=x-1;
+			arr_gold_y[i]=y-1;
+		}
+		for(int i=0;i<N;i++)
+		{
+			for(int j=0;j<N;j++)
+			{
+				if(map[i][j] ==2)
+				{
+					cin>>map[i][j];
+					map[i][j]=2;
+				}else
+				{
+					cin>>map[i][j];
+				}
+			}
+		}
+		for(int i=0;i<G;i++)
+		{
+			resetmap_visited();
+			BFS(arr_gold_x[i],arr_gold_y[i],i);
+		}
+		for(int i=0;i<N;i++)
+		{
+			for(int j=0;j<N;j++)
+			{
+				if(map[i][j] !=0 )
+				{
+					map_BFS[i][j][G]=find_max_cost(i,j);
+				}
+			}
+		}
+		int result=999999;
+		for(int i=0;i<N;i++)
+		{
+			for(int j=0;j<N;j++)
+			{
+				if(map_BFS[i][j][G] < result && map_BFS[i][j][G]>0)
+				{
+					result=map_BFS[i][j][G];
+				}
+			}
+		}
+		cout<<"Case #"<<tc<<endl;
+		cout<<result<<endl;
+	}
+	return 0;
+}
